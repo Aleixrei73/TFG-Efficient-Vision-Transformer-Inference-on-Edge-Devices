@@ -202,18 +202,21 @@ def train(model: torch.nn.Module,
     # Return the filled results at the end of the epochs
     return results
 
-def evaluate(model, val_dataloader, loss_fn, device, model_path):
+def evaluate(model, val_dataloader, loss_fn, device, model_path=None):
+
 
     model.to(device)
-    
+    torch.cuda.reset_peak_memory_stats()
+
     val_loss, val_acc = test_step(model=model,
           dataloader=val_dataloader,
           loss_fn=loss_fn,
           device=device)
 
-    pretrained_vit_model_size = Path(model_path).stat().st_size // (1024*1024)
-
     print(f'Validation loss: {val_loss}\n'
         f'Validation accuracy: {val_acc}\n'
         f'Number of images: {128*len(val_dataloader)}\n'
-        f'Size (in MB): {pretrained_vit_model_size}')
+        f'Peak Memory allocated: {torch.cuda.max_memory_allocated()/(1024*1024)}')
+    if model_path != None: 
+        pretrained_vit_model_size = Path(model_path).stat().st_size // (1024*1024)
+        print(f'Size (in MB): {pretrained_vit_model_size}')

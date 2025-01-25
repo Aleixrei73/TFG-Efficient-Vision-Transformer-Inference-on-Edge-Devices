@@ -3,15 +3,24 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
 import torchvision
+from torchvision import transforms
 from torchvision.datasets import ImageFolder
 from pathlib import Path
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
+from torchinfo import summary
 
 NUM_WORKERS = os.cpu_count()
 
-def create_loaders(path, transform, batch_size, num_workers=NUM_WORKERS):
+def create_loaders(path, transform, batch_size, num_workers=NUM_WORKERS, dtype=None):
+
+    if dtype != None:
+        transform = transforms.Compose([
+            transform,
+            transforms.ConvertImageDtype(dtype)
+        ])
+
     dataset = torchvision.datasets.CIFAR10(Path(path), train=True, transform=transform, download=True)
     train_dataset, test_dataset = random_split(dataset, [0.8, 0.2])
     val_dataset = torchvision.datasets.CIFAR10(Path(path), train=False, transform=transform, download=False)
@@ -120,3 +129,12 @@ def load_default_model():
     vit.heads = nn.Linear(in_features=768, out_features=10)
     vit.load_state_dict(torch.load(model_path))
     return vit
+
+def sumarize(model):
+    summary(model=model,
+        input_size=(32, 3, 224, 224), # (batch_size, color_channels, height, width)
+        # col_names=["input_size"], # uncomment for smaller output
+        col_names=["input_size", "output_size", "num_params", "trainable"],
+        col_width=20,
+        row_settings=["var_names"]
+    )
