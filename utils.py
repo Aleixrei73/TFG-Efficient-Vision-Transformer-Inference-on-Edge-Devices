@@ -14,13 +14,25 @@ from functools import reduce
 
 NUM_WORKERS = os.cpu_count()
 
+class FlattenPermute(nn.Module):
+
+    def __init__(self, start_dim, end_dim):
+        super().__init__()
+        self.flatten = nn.Flatten(start_dim=start_dim, end_dim=end_dim)
+
+    def forward(self, x):
+        x = self.flatten(x)
+        return x.permute(0, 2, 1)
 
 def get_n_encoders(model, n):
     
     layers = []
     for idx, (name, module) in enumerate(model.named_modules()):
-        if idx == 1 or idx == 3:
+        if idx == 1:
             layers.append(module)
+        elif idx == 3:
+            layers.append(module)
+            layers.append(FlattenPermute(start_dim=2, end_dim=3))
         elif name.count('.') == 2:
             num = int(name.split('_')[-1])
             if num < n:
