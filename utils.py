@@ -10,8 +10,30 @@ from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 from torchinfo import summary
+from functools import reduce
 
 NUM_WORKERS = os.cpu_count()
+
+
+def get_n_encoders(model, n):
+    
+    layers = []
+    for idx, (name, module) in enumerate(model.named_modules()):
+        if idx == 1 or idx == 3:
+            layers.append(module)
+        elif name.count('.') == 2:
+            num = int(name.split('_')[-1])
+            if num < n:
+                layers.append(module)
+            else:
+                return nn.Sequential(*layers)
+    
+    return nn.Sequential(*layers)
+        
+
+def get_module(model, name):
+    names = name.split(sep='.')
+    return reduce(getattr, names, model)
 
 def create_loaders(path, transform, batch_size, num_workers=NUM_WORKERS, dtype=None):
 

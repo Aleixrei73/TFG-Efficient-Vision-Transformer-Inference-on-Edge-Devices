@@ -214,9 +214,9 @@ def evaluate(model, val_dataloader, loss_fn, device, model_path=None):
           device=device)
 
     print(f'Validation loss: {val_loss}\n'
-        f'Validation accuracy: {val_acc}\n'
+        f'Validation accuracy: {(val_acc*100):.2f}\n'
         f'Number of images: {128*len(val_dataloader)}\n'
-        f'Peak Memory allocated: {torch.cuda.max_memory_allocated()/(1024*1024)}')
+        f'Peak Memory allocated: {(torch.cuda.max_memory_allocated()/(1024*1024)):.2f}')
     if model_path != None: 
         pretrained_vit_model_size = Path(model_path).stat().st_size // (1024*1024)
-        print(f'Size (in MB): {pretrained_vit_model_size}')
+        print(f'Size (in MB): {pretrained_vit_model_size:.2f}')
