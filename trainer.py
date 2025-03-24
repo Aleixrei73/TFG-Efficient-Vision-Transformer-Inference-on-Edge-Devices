@@ -6,6 +6,10 @@ import torch
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
 from pathlib import Path
+import utils
+import time
+import numpy as np
+import matplotlib.pyplot as plt
 
 def train_step(model: torch.nn.Module, 
                dataloader: torch.utils.data.DataLoader, 
@@ -220,3 +224,35 @@ def evaluate(model, val_dataloader, loss_fn, device, model_path=None):
     if model_path != None: 
         pretrained_vit_model_size = Path(model_path).stat().st_size // (1024*1024)
         print(f'Size (in MB): {pretrained_vit_model_size:.2f}')
+
+
+def getMetrics(model, val_dl, device, num_times=100):
+    
+    model = model.to(device)
+    times = np.array([0]*num_times,dtype=np.float64)
+    peak_memory = np.array([0]*num_times, dtype=np.float64)
+    
+    
+    model.eval()
+    
+    with torch.inference_mode():
+    
+        for i in tqdm(range(num_times)):
+            torch.cuda.reset_peak_memory_stats()
+            batch = next(iter(val_dl))
+            X, y = batch
+            X = X.to(device)
+            y = y.to(device)
+            time_init = time.time()
+            res = model(X)
+            time_end = time.time()
+            times[i] = (time_end - time_init)*1000
+            peak_memory[i] = torch.cuda.max_memory_allocated()/(1024*1024)
+            
+    
+    plt.figure(),plt.plot(times[1:]),plt.show()
+    plt.figure(),plt.plot(peak_memory[1:]),plt.show()
+    print(f'Mean time over 500 executions: {np.mean(times[1:])} ms/batch \n'
+          f'Mean memory over 500 executions: {np.mean(peak_memory[1:])} MB')
+    
+    return {"Latency" : times, "Memory" : peak_memory}
