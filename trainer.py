@@ -10,6 +10,9 @@ import utils
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+import fnmatch
+from pathlib import Path
 
 def train_step(model: torch.nn.Module, 
                dataloader: torch.utils.data.DataLoader, 
@@ -210,49 +213,120 @@ def evaluate(model, val_dataloader, loss_fn, device, model_path=None):
 
 
     model.to(device)
-    torch.cuda.reset_peak_memory_stats()
 
-    val_loss, val_acc = test_step(model=model,
+    _,val_acc = test_step(model=model,
           dataloader=val_dataloader,
           loss_fn=loss_fn,
           device=device)
 
-    print(f'Validation loss: {val_loss}\n'
-        f'Validation accuracy: {(val_acc*100):.2f}\n'
-        f'Number of images: {128*len(val_dataloader)}\n'
-        f'Peak Memory allocated: {(torch.cuda.max_memory_allocated()/(1024*1024)):.2f}')
-    if model_path != None: 
-        pretrained_vit_model_size = Path(model_path).stat().st_size // (1024*1024)
-        print(f'Size (in MB): {pretrained_vit_model_size:.2f}')
+    print(f'Validation accuracy: {(val_acc*100):.2f}')
+    
+    return val_acc
 
 
-def getMetrics(model, val_dl, device, num_times=100):
+def plot_with_indicators(data,title,save_plots,plot_title,ylabel=None):
+    
+    x = np.array([i for i in range(len(data))])
+    
+    plt.figure()
+    plt.plot(data, color="blue",label="Values")
+    average = np.repeat(np.mean(data), len(data))
+    std = np.repeat(np.std(data), len(data))
+    plt.plot(average, color="Red", label="Mean")
+    
+    plt.fill_between(x, average-std, average + std, color="green", alpha=0.2,label="Std Dev")
+    
+    plt.title(title)
+    plt.xlabel("Iteration")
+    if ylabel is None: plt.ylabel("Time (ms/batch)")
+    else: plt.ylabel(ylabel)
+    
+    plt.legend()
+    
+    if save_plots:
+        
+        directory_path = Path(f"summary/{plot_title}")
+        directory_path.mkdir(parents=True, exist_ok=True)
+        final_title = plot_title+"-"+title.replace(' ','-')
+        plt.savefig(f"graphs/{plot_title}/{final_title}.png")
+    
+    plt.show()
+
+def getMetrics(model, val_dl, device, num_times=100, save_plots=False, model_title=None):
+    
+    if save_plots and model_title is None:
+        print("Must set model_title when saving plots")
+        return -1
     
     model = model.to(device)
-    times = np.array([0]*num_times,dtype=np.float64)
+    times_total = np.array([0]*num_times,dtype=np.float64)
+    times_memory = np.array([0]*num_times,dtype=np.float64)
+    times_inference = np.array([0]*num_times,dtype=np.float64)
     peak_memory = np.array([0]*num_times, dtype=np.float64)
     
     
     model.eval()
     
-    with torch.inference_mode():
+    print("Doing warm-up runs...")
     
+    with torch.inference_mode():
+        # We add 10 runs as warm-up runs
+        for i in range(10):
+            
+            batch = next(iter(val_dl))
+            X, y = batch
+            
+            X = X.to(device)
+            y = y.to(device)
+            torch.cuda.synchronize()
+            
+            res = model(X)
+            torch.cuda.synchronize()
+    
+    print("Ended warm-up, beginning true runs...")
+    
+    with torch.inference_mode():
+        # We add 10 runs as warm-up runs
         for i in tqdm(range(num_times)):
+            
+            # Reset of memory stats to accurate results
             torch.cuda.reset_peak_memory_stats()
             batch = next(iter(val_dl))
             X, y = batch
+            
+            # Compute memory management time
+            time_init = time.time()
             X = X.to(device)
             y = y.to(device)
+            torch.cuda.synchronize()
+            times_memory[i] = (time.time() - time_init)*1000
+            
+            # Compute inference time
             time_init = time.time()
             res = model(X)
-            time_end = time.time()
-            times[i] = (time_end - time_init)*1000
+            torch.cuda.synchronize()
+            times_inference[i] = (time.time() - time_init)*1000 
+            
+            # Computing total time and memory peak
+            times_total[i] = times_memory[i]+times_inference[i]
             peak_memory[i] = torch.cuda.max_memory_allocated()/(1024*1024)
             
     
-    plt.figure(),plt.plot(times[1:]),plt.show()
-    plt.figure(),plt.plot(peak_memory[1:]),plt.show()
-    print(f'Mean time over 500 executions: {np.mean(times[1:])} ms/batch \n'
-          f'Mean memory over 500 executions: {np.mean(peak_memory[1:])} MB')
+    plot_with_indicators(times_total,"Total time",save_plots,model_title)
+    plot_with_indicators(times_memory,"Memory management time",save_plots,model_title)
+    plot_with_indicators(times_inference,"Inference time",save_plots,model_title)
+    plot_with_indicators(peak_memory,"Memory usage",save_plots,model_title, ylabel="Memory usage (MB)")
     
-    return {"Latency" : times, "Memory" : peak_memory}
+    if save_plots:
+        with open(f"summary/{model_title}/metrics.txt") as f:
+            f.write(f'Mean total time over {num_times} executions: {np.mean(times_total)} ms/batch \n'
+                    f'Mean memory time over {num_times} executions: {np.mean(times_memory)} ms/batch \n'
+                    f'Mean inference time over {num_times} executions: {np.mean(times_inference)} ms/batch \n'
+                    f'Mean memory over {num_times} executions: {np.mean(peak_memory)} MB')
+    
+    print(f'Mean total time over {num_times} executions: {np.mean(times_total)} ms/batch \n'
+          f'Mean memory time over {num_times} executions: {np.mean(times_memory)} ms/batch \n'
+          f'Mean inference time over {num_times} executions: {np.mean(times_inference)} ms/batch \n'
+          f'Mean memory over {num_times} executions: {np.mean(peak_memory)} MB')
+    
+    return {"Total latency" : times_total, "Memory latency" : times_memory, "Inference Latency" : times_inference, "Memory" : peak_memory}
