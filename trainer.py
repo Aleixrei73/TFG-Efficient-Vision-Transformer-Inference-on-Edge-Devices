@@ -245,10 +245,10 @@ def plot_with_indicators(data,title,save_plots,plot_title,ylabel=None):
     
     if save_plots:
         
-        directory_path = Path(f"summary/{plot_title}")
+        directory_path = Path(f"summary/{plot_title}/graphs")
         directory_path.mkdir(parents=True, exist_ok=True)
         final_title = plot_title+"-"+title.replace(' ','-')
-        plt.savefig(f"graphs/{plot_title}/{final_title}.png")
+        plt.savefig(f"summary/{plot_title}/graphs/{final_title}.png")
     
     plt.show()
 
@@ -318,7 +318,7 @@ def getMetrics(model, val_dl, device, num_times=100, save_plots=False, model_tit
     plot_with_indicators(peak_memory,"Memory usage",save_plots,model_title, ylabel="Memory usage (MB)")
     
     if save_plots:
-        with open(f"summary/{model_title}/metrics.txt") as f:
+        with open(f"summary/{model_title}/metrics.txt", "w+") as f:
             f.write(f'Mean total time over {num_times} executions: {np.mean(times_total)} ms/batch \n'
                     f'Mean memory time over {num_times} executions: {np.mean(times_memory)} ms/batch \n'
                     f'Mean inference time over {num_times} executions: {np.mean(times_inference)} ms/batch \n'
