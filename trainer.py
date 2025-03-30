@@ -229,12 +229,12 @@ def plot_with_indicators(data,title,save_plots,plot_title,ylabel=None):
     x = np.array([i for i in range(len(data))])
     
     plt.figure()
-    plt.plot(data, color="blue",label="Values")
+    plt.plot(data, color="blue",label="Values",zorder=0)
     average = np.repeat(np.mean(data), len(data))
     std = np.repeat(np.std(data), len(data))
-    plt.plot(average, color="Red", label="Mean")
+    plt.plot(average, color="Red", label="Mean",zorder=10)
     
-    plt.fill_between(x, average-std, average + std, color="green", alpha=0.2,label="Std Dev")
+    plt.fill_between(x, average-std, average + std, color="green", alpha=0.6,label="Std Dev",zorder=100)
     
     plt.title(title)
     plt.xlabel("Iteration")
@@ -319,10 +319,10 @@ def getMetrics(model, val_dl, device, num_times=100, save_plots=False, model_tit
     
     if save_plots:
         with open(f"summary/{model_title}/metrics.txt", "w+") as f:
-            f.write(f'Mean total time over {num_times} executions: {np.mean(times_total)} ms/batch \n'
-                    f'Mean memory time over {num_times} executions: {np.mean(times_memory)} ms/batch \n'
-                    f'Mean inference time over {num_times} executions: {np.mean(times_inference)} ms/batch \n'
-                    f'Mean memory over {num_times} executions: {np.mean(peak_memory)} MB')
+            f.write(f'Mean total time over {num_times} executions: {np.mean(times_total)} +- {np.std(times_total)} ms/batch \n'
+                    f'Mean memory time over {num_times} executions: {np.mean(times_memory)} +- {np.std(times_memory)} ms/batch \n'
+                    f'Mean inference time over {num_times} executions: {np.mean(times_inference)} +- {np.std(times_inference)} ms/batch \n'
+                    f'Mean memory over {num_times} executions: {np.mean(peak_memory)} +- {np.std(times_total)} MB')
     
     print(f'Mean total time over {num_times} executions: {np.mean(times_total)} ms/batch \n'
           f'Mean memory time over {num_times} executions: {np.mean(times_memory)} ms/batch \n'
