@@ -212,6 +212,8 @@ def train(model: torch.nn.Module,
 def evaluate(model, val_dataloader, loss_fn, device, model_path=None):
 
 
+    print("Beginning evaluation...\n")
+
     model.to(device)
 
     _,val_acc = test_step(model=model,

@@ -1,0 +1,71 @@
+0.00% Pruning
+Mean total time over 100 executions: 188.42790842056274 +- 5.067089604616477 ms/batch 
+Mean memory time over 100 executions: 1.9420313835144043 +- 0.06773742852802708 ms/batch 
+Mean inference time over 100 executions: 186.48587703704834 +- 5.075036670862952 ms/batch 
+Mean memory over 100 executions: 594.26513671875 +- 0.0 MB
+
+2.00% Pruning
+Mean total time over 100 executions: 188.78093481063843 +- 5.4145868889815825 ms/batch 
+Mean memory time over 100 executions: 1.9343066215515137 +- 0.06089696154387551 ms/batch 
+Mean inference time over 100 executions: 186.8466281890869 +- 5.4138549099688795 ms/batch 
+Mean memory over 100 executions: 587.43701171875 +- 0.0 MB
+
+4.00% Pruning
+Mean total time over 100 executions: 190.23711442947388 +- 5.226495765309864 ms/batch 
+Mean memory time over 100 executions: 1.917109489440918 +- 0.053332342404955775 ms/batch 
+Mean inference time over 100 executions: 188.32000494003296 +- 5.220441592478594 ms/batch 
+Mean memory over 100 executions: 582.24658203125 +- 0.0 MB
+
+6.00% Pruning
+Mean total time over 100 executions: 185.24706840515137 +- 5.121296150808166 ms/batch 
+Mean memory time over 100 executions: 1.9176864624023438 +- 0.056618891195848675 ms/batch 
+Mean inference time over 100 executions: 183.32938194274902 +- 5.119225372834912 ms/batch 
+Mean memory over 100 executions: 578.61865234375 +- 0.0 MB
+
+8.00% Pruning
+Mean total time over 100 executions: 183.98926734924316 +- 5.346225553910012 ms/batch 
+Mean memory time over 100 executions: 1.9451546669006348 +- 0.07682768015683615 ms/batch 
+Mean inference time over 100 executions: 182.04411268234253 +- 5.339712196033648 ms/batch 
+Mean memory over 100 executions: 566.84521484375 +- 0.0 MB
+
+10.00% Pruning
+Mean total time over 100 executions: 179.81950044631958 +- 4.669526164054718 ms/batch 
+Mean memory time over 100 executions: 1.9264912605285645 +- 0.06180327681284497 ms/batch 
+Mean inference time over 100 executions: 177.89300918579102 +- 4.6661676867900725 ms/batch 
+Mean memory over 100 executions: 560.25048828125 +- 0.0 MB
+
+12.00% Pruning
+Mean total time over 100 executions: 178.19480180740356 +- 5.84331979563073 ms/batch 
+Mean memory time over 100 executions: 1.942582130432129 +- 0.0635822843447849 ms/batch 
+Mean inference time over 100 executions: 176.25221967697144 +- 5.849499706931022 ms/batch 
+Mean memory over 100 executions: 555.63232421875 +- 0.0 MB
+
+14.00% Pruning
+Mean total time over 100 executions: 176.9806981086731 +- 5.055937626649354 ms/batch 
+Mean memory time over 100 executions: 1.9376444816589355 +- 0.061121766053360435 ms/batch 
+Mean inference time over 100 executions: 175.04305362701416 +- 5.047395590822245 ms/batch 
+Mean memory over 100 executions: 544.09130859375 +- 0.0 MB
+
+16.00% Pruning
+Mean total time over 100 executions: 174.77511882781982 +- 5.3117851709373385 ms/batch 
+Mean memory time over 100 executions: 1.9332408905029297 +- 0.07103863906792661 ms/batch 
+Mean inference time over 100 executions: 172.8418779373169 +- 5.306924285709441 ms/batch 
+Mean memory over 100 executions: 537.27197265625 +- 0.0 MB
+
+18.00% Pruning
+Mean total time over 100 executions: 172.03938722610474 +- 5.115992928748048 ms/batch 
+Mean memory time over 100 executions: 1.9328069686889648 +- 0.05680762396019071 ms/batch 
+Mean inference time over 100 executions: 170.10658025741577 +- 5.113283005365126 ms/batch 
+Mean memory over 100 executions: 531.47314453125 +- 0.0 MB
+
+20.00% Pruning
+Mean total time over 100 executions: 169.4914960861206 +- 5.1247356124291725 ms/batch 
+Mean memory time over 100 executions: 1.9328546524047852 +- 0.05744347207519665 ms/batch 
+Mean inference time over 100 executions: 167.55864143371582 +- 5.125617101767928 ms/batch 
+Mean memory over 100 executions: 523.06982421875 +- 0.0 MB
+
+30.00% Pruning
+Mean total time over 100 executions: 157.24721670150757 +- 5.0507782582185055 ms/batch 
+Mean memory time over 100 executions: 1.9432830810546875 +- 0.07264871987077678 ms/batch 
+Mean inference time over 100 executions: 155.30393362045288 +- 5.043969412083641 ms/batch 
+Mean memory over 100 executions: 491.47998046875 +- 0.0 MB

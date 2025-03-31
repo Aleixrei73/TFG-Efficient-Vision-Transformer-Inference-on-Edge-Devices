@@ -11,6 +11,8 @@ from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 from torchinfo import summary
 from functools import reduce
+import copy
+import torch.nn.utils.prune as prune
 
 NUM_WORKERS = os.cpu_count()
 
@@ -162,13 +164,63 @@ def load_default_model():
     vit = torchvision.models.vit_b_16()
     vit.heads = nn.Linear(in_features=768, out_features=10)
     vit.load_state_dict(torch.load(model_path))
+    print(vit.heads)
     return vit
 
 def sumarize(model):
-    summary(model=model,
+    print(summary(model=model,
         input_size=(32, 3, 224, 224), # (batch_size, color_channels, height, width)
         # col_names=["input_size"], # uncomment for smaller output
         col_names=["input_size", "output_size", "num_params", "trainable"],
         col_width=20,
         row_settings=["var_names"]
-    )
+    ))
+    
+    
+def prune_vit_mlp(working_layers):
+    
+    pruned_remains = []
+    
+    for idx, line in enumerate(working_layers[0].weight):
+        if (torch.any(line != 0)):
+            pruned_remains.append(idx)
+
+    pruned_weights = working_layers[0].weight[pruned_remains]
+    pruned_bias = working_layers[0].bias[pruned_remains]
+
+    working_layers[0] = nn.Linear(in_features=working_layers[0].weight.shape[1], out_features=len(pruned_remains))
+
+    working_layers[0].weight = nn.Parameter(pruned_weights)
+    working_layers[0].bias = nn.Parameter(pruned_bias)
+
+    pruned_weights = working_layers[3].weight[:, pruned_remains]
+    aux_bias = working_layers[3].bias
+
+    working_layers[3] = nn.Linear(in_features=len(pruned_remains), out_features=pruned_weights.shape[0])
+    working_layers[3].weight = nn.Parameter(pruned_weights)
+    working_layers[3].bias = nn.Parameter(aux_bias)
+    
+    
+def prune_vit(model,amount):
+    
+    model_pruned = copy.deepcopy(model)
+    
+    for name, module in model_pruned.named_modules():
+        if isinstance(module, nn.Linear) and 'mlp' in name:
+            prune.ln_structured(module, "weight", amount=amount, n=2, dim=0)
+            prune.remove(module, "weight")
+            
+    mlp_blocks = []
+
+    for name,module in model_pruned.named_modules():
+        
+        if 'mlp' in name and name[-1] == 'p':
+            mlp_blocks.append(module)
+            
+    for working_layers in mlp_blocks:
+        prune_vit_mlp(working_layers)
+    
+    for parameter in model_pruned.parameters():
+        parameter.requires_grad = False
+        
+    return model_pruned
