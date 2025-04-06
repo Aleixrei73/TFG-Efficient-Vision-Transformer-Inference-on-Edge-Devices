@@ -160,11 +160,10 @@ def save_model(model: torch.nn.Module,
 
 
 def load_default_model():
-    model_path = Path("model/ViT-Default.pht")
+    model_path = Path("model/ViT-Default-Best.pht")
     vit = torchvision.models.vit_b_16()
     vit.heads = nn.Linear(in_features=768, out_features=10)
-    vit.load_state_dict(torch.load(model_path))
-    print(vit.heads)
+    vit.load_state_dict(torch.load(model_path, weights_only=True))
     return vit
 
 def sumarize(model):
@@ -221,6 +220,6 @@ def prune_vit(model,amount):
         prune_vit_mlp(working_layers)
     
     for parameter in model_pruned.parameters():
-        parameter.requires_grad = False
+        parameter.requires_grad = True
         
     return model_pruned

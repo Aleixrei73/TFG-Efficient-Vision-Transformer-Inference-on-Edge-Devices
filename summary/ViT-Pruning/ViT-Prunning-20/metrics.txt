@@ -1,0 +1,4 @@
+Mean total time over 100 executions: 169.27273750305176 +- 4.835624039188598 ms/batch 
+Mean memory time over 100 executions: 1.9177913665771484 +- 0.05750543441427535 ms/batch 
+Mean inference time over 100 executions: 167.3549461364746 +- 4.835809121863682 ms/batch 
+Mean memory over 100 executions: 540.61669921875 +- 4.835624039188598 MB

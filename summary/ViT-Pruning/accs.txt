@@ -1,11 +1,8 @@
-Model 20.00% pruned has 71.22% acc
-Model 18.00% pruned has 74.58% acc
-Model 16.00% pruned has 79.35% acc
-Model 14.00% pruned has 82.69% acc
-Model 12.00% pruned has 84.86% acc
-Model 10.00% pruned has 86.92% acc
-Model 8.00% pruned has 88.36% acc
-Model 6.00% pruned has 91.25% acc
-Model 4.00% pruned has 92.51% acc
-Model 2.00% pruned has 93.70% acc
-Model 0.00% pruned has 94.77% acc
+Model 10% : 93.74%
+Model 20% : 91.26%
+Model 30% : 86.09%
+Model 40% : 71.77%
+Model 50% : 44.34%
+Model 60% : 24.50%
+Model 70% : 18.00%
+Model 80% : 16.60%

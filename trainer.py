@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import os
 import fnmatch
 from pathlib import Path
+from torch.utils.tensorboard import SummaryWriter
 
 def train_step(model: torch.nn.Module, 
                dataloader: torch.utils.data.DataLoader, 
@@ -133,6 +134,8 @@ def train(model: torch.nn.Module,
           scheduler: torch.optim.lr_scheduler,
           loss_fn: torch.nn.Module,
           epochs: int,
+          writer: SummaryWriter,
+          model_name: str,
           device: torch.device) -> Dict[str, List]:
     """Trains and tests a PyTorch model.
 
@@ -174,6 +177,13 @@ def train(model: torch.nn.Module,
     
     # Make sure model on target device
     model.to(device)
+    
+    print("Generating comparative performance")
+    _, current_max = test_step(model=model,
+          dataloader=test_dataloader,
+          loss_fn=loss_fn,
+          device=device)
+    print(f"First performance: {current_max}")
 
     # Loop through training and testing steps for a number of epochs
     for epoch in tqdm(range(epochs)):
@@ -185,11 +195,26 @@ def train(model: torch.nn.Module,
         before_lr = optimizer.param_groups[0]["lr"]
         scheduler.step()
         after_lr = optimizer.param_groups[0]["lr"]
-        print("Epoch %d: SGD lr %.4f -> %.4f" % (epoch, before_lr, after_lr))
         test_loss, test_acc = test_step(model=model,
           dataloader=test_dataloader,
           loss_fn=loss_fn,
           device=device)
+        writer.add_scalar("Loss/train", train_loss, epoch)
+        writer.add_scalar("Acc/Train", train_acc, epoch)
+        writer.add_scalar("Loss/Test", test_loss, epoch)
+        writer.add_scalar("Acc/Test", test_acc, epoch)
+        
+        if test_acc > current_max:
+            current_max = test_acc
+            target_dir_path = Path("model")
+            target_dir_path.mkdir(parents=True,exist_ok=True)
+
+            # Create model save path
+            model_save_path = target_dir_path / f"ViT-{model_name}-Best.pht"
+
+            # Save the model state_dict()
+            print(f"[INFO] Saving model to: {model_save_path}")
+            torch.save(obj=model.state_dict(),f=model_save_path)
 
         # Print out what's happening
         print(
@@ -207,7 +232,8 @@ def train(model: torch.nn.Module,
         results["test_acc"].append(test_acc)
 
     # Return the filled results at the end of the epochs
-    return results
+    writer.flush()
+    return results, current_max
 
 def evaluate(model, val_dataloader, loss_fn, device, model_path=None):
 
