@@ -47,7 +47,7 @@ for i in tqdm(range(1, 9)):
     target_dir_path.mkdir(parents=True,exist_ok=True)
 
             # Create model save path
-    model_save_path = target_dir_path / f"ViT-Prunning{needed_pruning:.2f}.pht"
+    model_save_path = target_dir_path / f"ViT-Prunning{needed_pruning:.2f}-Prueba.pht"
 
             # Save the model state_dict()
     print(f"[INFO] Saving model to: {model_save_path}")
@@ -57,6 +57,6 @@ for i in tqdm(range(1, 9)):
 
     pretrained_vit_results, max_perf = trainer.train(model=prunned_model, train_dataloader=train_dl,
                                         test_dataloader=test_dl, optimizer=optimizer, scheduler=scheduler,
-                                        loss_fn=loss_fn, epochs=3, writer=writer, model_name=f"Prunning{prunning_step*i:.2f}" , device=device)
+                                        loss_fn=loss_fn, epochs=3, writer=writer, model_name=f"PrunningPrueba{prunning_step*i:.2f}" , device=device)
     print(f"Max performance: {max_perf}")
     writer.close()
