@@ -1,3 +1,6 @@
+"""
+Contains various utility functions for PyTorch model training and saving.
+"""
 import os
 import torch
 import torch.nn as nn
@@ -43,7 +46,6 @@ def get_n_encoders(model, n):
                 return nn.Sequential(*layers)
     
     return nn.Sequential(*layers)
-        
 
 def get_module(model, name):
     names = name.split(sep='.')
@@ -84,7 +86,6 @@ def create_loaders(path, transform, batch_size, num_workers=NUM_WORKERS, dtype=N
     )
     return train_dl, test_dl, val_dl, class_names
 
-# Plot loss curves of a model
 def plot_loss_curves(results):
     """Plots training curves of a results dictionary.
 
@@ -121,13 +122,6 @@ def plot_loss_curves(results):
     plt.xlabel("Epochs")
     plt.legend()
 
-
-"""
-Contains various utility functions for PyTorch model training and saving.
-"""
-import torch
-from pathlib import Path
-
 def save_model(model: torch.nn.Module,
                target_dir: str,
                model_name: str):
@@ -158,7 +152,6 @@ def save_model(model: torch.nn.Module,
     torch.save(obj=model.state_dict(),
              f=model_save_path)
 
-
 def load_default_model():
     model_path = Path("model/ViT-Default-Best.pht")
     vit = torchvision.models.vit_b_16()
@@ -174,7 +167,6 @@ def sumarize(model):
         col_width=20,
         row_settings=["var_names"]
     ))
-    
     
 def prune_vit_mlp(working_layers):
     
@@ -198,7 +190,6 @@ def prune_vit_mlp(working_layers):
     working_layers[3] = nn.Linear(in_features=len(pruned_remains), out_features=pruned_weights.shape[0])
     working_layers[3].weight = nn.Parameter(pruned_weights)
     working_layers[3].bias = nn.Parameter(aux_bias)
-    
     
 def prune_vit(model,amount):
     

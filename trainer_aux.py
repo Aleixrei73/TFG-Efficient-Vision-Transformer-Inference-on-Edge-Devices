@@ -14,30 +14,32 @@ import os
 import fnmatch
 from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
+import torch.nn.functional as F
+import torch.nn as nn
 
 def train_step(model: torch.nn.Module, 
                dataloader: torch.utils.data.DataLoader, 
                loss_fn: torch.nn.Module, 
                optimizer: torch.optim.Optimizer,
                device: torch.device) -> Tuple[float, float]:
-    r"""Trains a PyTorch model for a single epoch.
+    """Trains a PyTorch model for a single epoch.
 
     Turns a target PyTorch model to training mode and then
     runs through all of the required training steps (forward
     pass, loss calculation, optimizer step).
 
     Args:
-        model: A PyTorch model to be trained.
-        dataloader: A DataLoader instance for the model to be trained on.
-        loss_fn: A PyTorch loss function to minimize.
-        optimizer: A PyTorch optimizer to help minimize the loss function.
-        device: A target device to compute on (e.g. "cuda" or "cpu").
+    model: A PyTorch model to be trained.
+    dataloader: A DataLoader instance for the model to be trained on.
+    loss_fn: A PyTorch loss function to minimize.
+    optimizer: A PyTorch optimizer to help minimize the loss function.
+    device: A target device to compute on (e.g. "cuda" or "cpu").
 
     Returns:
-        result: A tuple of training loss and training accuracy metrics.
-        In the form (train_loss, train_accuracy). For example:
+    A tuple of training loss and training accuracy metrics.
+    In the form (train_loss, train_accuracy). For example:
 
-        (0.1112, 0.8743)
+    (0.1112, 0.8743)
     """
     # Put model in train mode
     model.train()
@@ -81,22 +83,22 @@ def test_step(model: torch.nn.Module,
               dataloader: torch.utils.data.DataLoader, 
               loss_fn: torch.nn.Module,
               device: torch.device) -> Tuple[float, float]:
-    r"""Tests a PyTorch model for a single epoch.
+    """Tests a PyTorch model for a single epoch.
 
     Turns a target PyTorch model to "eval" mode and then performs
     a forward pass on a testing dataset.
 
     Args:
-        model: A PyTorch model to be tested.
-        dataloader: A DataLoader instance for the model to be tested on.
-        loss_fn: A PyTorch loss function to calculate loss on the test data.
-        device: A target device to compute on (e.g. "cuda" or "cpu").
+    model: A PyTorch model to be tested.
+    dataloader: A DataLoader instance for the model to be tested on.
+    loss_fn: A PyTorch loss function to calculate loss on the test data.
+    device: A target device to compute on (e.g. "cuda" or "cpu").
 
     Returns:
-        result: A tuple of testing loss and testing accuracy metrics.
-        In the form (test_loss, test_accuracy). For example:
+    A tuple of testing loss and testing accuracy metrics.
+    In the form (test_loss, test_accuracy). For example:
 
-        (0.0223, 0.8985)
+    (0.0223, 0.8985)
     """
     # Put model in eval mode
     model.eval() 
@@ -138,7 +140,7 @@ def train(model: torch.nn.Module,
           writer: SummaryWriter,
           model_name: str,
           device: torch.device) -> Dict[str, List]:
-    r"""Trains and tests a PyTorch model.
+    """Trains and tests a PyTorch model.
 
     Passes a target PyTorch models through train_step() and test_step()
     functions for a number of epochs, training and testing the model
@@ -147,29 +149,27 @@ def train(model: torch.nn.Module,
     Calculates, prints and stores evaluation metrics throughout.
 
     Args:
-        model: A PyTorch model to be trained and tested.
-        train_dataloader: A DataLoader instance for the model to be trained on.
-        test_dataloader: A DataLoader instance for the model to be tested on.
-        optimizer: A PyTorch optimizer to help minimize the loss function.
-        loss_fn: A PyTorch loss function to calculate loss on both datasets.
-        epochs: An integer indicating how many epochs to train for.
-        writer: A TensorBoard writer to log the training of the model
-        model_name: The name of the model to save it later on the model directory
-        device: A target device to compute on (e.g. "cuda" or "cpu").
+    model: A PyTorch model to be trained and tested.
+    train_dataloader: A DataLoader instance for the model to be trained on.
+    test_dataloader: A DataLoader instance for the model to be tested on.
+    optimizer: A PyTorch optimizer to help minimize the loss function.
+    loss_fn: A PyTorch loss function to calculate loss on both datasets.
+    epochs: An integer indicating how many epochs to train for.
+    device: A target device to compute on (e.g. "cuda" or "cpu").
 
     Returns:
-        A dictionary of training and testing loss as well as training and
-        testing accuracy metrics. Each metric has a value in a list for 
-        each epoch.
-        In the form: {train_loss: [...],
-                train_acc: [...],
-                test_loss: [...],
-                test_acc: [...]} 
-        For example if training for epochs=2: 
-                {train_loss: [2.0616, 1.0537],
-                train_acc: [0.3945, 0.3945],
-                test_loss: [1.2641, 1.5706],
-                test_acc: [0.3400, 0.2973]} 
+    A dictionary of training and testing loss as well as training and
+    testing accuracy metrics. Each metric has a value in a list for 
+    each epoch.
+    In the form: {train_loss: [...],
+              train_acc: [...],
+              test_loss: [...],
+              test_acc: [...]} 
+    For example if training for epochs=2: 
+             {train_loss: [2.0616, 1.0537],
+              train_acc: [0.3945, 0.3945],
+              test_loss: [1.2641, 1.5706],
+              test_acc: [0.3400, 0.2973]} 
     """
     # Create empty results dictionary
     results = {"train_loss": [],
@@ -238,20 +238,8 @@ def train(model: torch.nn.Module,
     writer.flush()
     return results, current_max
 
-def evaluate(model, val_dataloader, loss_fn, device):
+def evaluate(model, val_dataloader, loss_fn, device, model_path=None):
 
-    r"""
-    Evaluates a pytorch model on the given data and with the given loss function
-    
-    Args:
-        model: A pytorch model to be evaluated
-        val_dataloader: A pytorch :class:`DataLoader` of the data the model will be evaluated with
-        loss_fn: A loss function the will be used to evaluate the loss of the model
-        device: The device the model will be executed within
-    
-    Returns:
-        val_acc: The accuracy the model has on the provided data
-    """
 
     print("Beginning evaluation...\n")
 
@@ -266,18 +254,8 @@ def evaluate(model, val_dataloader, loss_fn, device):
     
     return val_acc
 
+
 def plot_with_indicators(data,title,save_plots,plot_title,ylabel=None):
-    
-    r"""
-    Plots a given data along with its mean and standard deviation
-    
-    Args:
-        data: An array with the data to plot
-        title: The plot title
-        save_plots: If ``True``, it saves the plot into a png within a subdirectory of the summary folder
-        plot_title: If save_plots is ``True``, it is the subdirectory of the summary folder the plot will be saved to
-        y_label: If not ``None``, sets the y label name on the plot. Default:``True``
-    """
     
     x = np.array([i for i in range(len(data))])
     
@@ -306,22 +284,6 @@ def plot_with_indicators(data,title,save_plots,plot_title,ylabel=None):
     plt.show()
 
 def getMetrics(model, val_dl, device, num_times=100, save_plots=False, model_title=None):
-    
-    r"""
-    Computes the total time, memory management time, inference time and memory
-    usage of a given model for a given data and does the mean among a desired 
-    number of executions
-    
-    Args:
-        model: A pytorch model to get the metrics from
-        val_dl: A pytorch :class:`DataLoader` with the needed data
-        device: A target device to compute on
-        num_times: The number of times to execute the computing of the metrics to do the mean. Default: 100
-        save_plots: If ``True`` it saves the plots printed by the function. Default: ``False``
-        model_title: If save_plots is ``True``, indicates the name of the subdirectory among the summary folder to save the plots
-    Returns:
-        A dictionary with all the metrics calculated in each execution
-    """
     
     if save_plots and model_title is None:
         print("Must set model_title when saving plots")
@@ -400,35 +362,32 @@ def getMetrics(model, val_dl, device, num_times=100, save_plots=False, model_tit
     
     return {"Total latency" : times_total, "Memory latency" : times_memory, "Inference Latency" : times_inference, "Memory" : peak_memory}
 
+def distillation_loss(teacher_pred, student_pred, student_target_loss, temp,lambda_param, loss_fn):
+    soft_teacher = F.softmax(teacher_pred / temp, dim=-1)
+    soft_student = F.log_softmax(student_pred / temp, dim=-1)
+    
+    print(soft_student.shape, soft_teacher.shape)
+    
+    distillation_loss = loss_fn(soft_student, soft_teacher) * (temp ** 2)
+    
+    loss = (1. - lambda_param) * student_target_loss + lambda_param * distillation_loss
+    
+    return loss
+
 def trainKD_step(teacher: torch.nn.Module,
                  student: torch.nn.Module,
                  dataloader: torch.utils.data.DataLoader, 
                  loss_fn: torch.nn.Module, 
+                 temp,
+                 lambda_param,
                  optimizer: torch.optim.Optimizer,
                  device: torch.device) -> Tuple[float, float]:
-    r"""Trains a PyTorch model with knowledge distillation for a single epoch.
 
-        Turns a student PyTorch model to training mode and then
-        runs through all of the required training steps (forward
-        pass, loss calculation, optimizer step).
-
-        Args:
-            teacher: A PyTorch model to be learned of.
-            student: A PyTorch model to train.
-            dataloader: A DataLoader instance for the model to be trained on.
-            loss_fn: A PyTorch loss function to minimize.
-            optimizer: A PyTorch optimizer to help minimize the loss function.
-            device: A target device to compute on (e.g. "cuda" or "cpu").
-
-        Returns:
-            result: A tuple of training loss and training accuracy metrics.
-            In the form (train_loss, train_accuracy). For example:
-
-            (0.1112, 0.8743)
-    """
     # Put model in train mode
     student.train()
     teacher.eval()
+    
+    kd_loss = nn.KLDivLoss(reduction="batchmean")
 
     # Setup train loss and train accuracy values
     train_loss, train_acc = 0, 0
@@ -444,16 +403,9 @@ def trainKD_step(teacher: torch.nn.Module,
         # 1. Forward pass
         student_pred = student(X)
         
-
-        # 2. Soften the student logits by applying softmax first and log() second
-        Z_s = student_pred
-        Z_t = teacher_pred
-        y_pred_teacher = torch.argmax(torch.softmax(Z_t, dim=1), dim=1)
+        true_label_loss = loss_fn(student_pred, y)
         
-        true_label_loss = loss_fn(Z_s, y)
-        teacher_label_loss = loss_fn(Z_s, y_pred_teacher)
-        
-        loss = 0.5 * (true_label_loss + teacher_label_loss)
+        loss = distillation_loss(teacher_pred, student_pred, true_label_loss, temp, lambda_param, kd_loss)
         
         train_loss += loss.item() 
 
@@ -477,6 +429,8 @@ def trainKD_step(teacher: torch.nn.Module,
 
 def trainKD(teacher: torch.nn.Module, 
             student: torch.nn.Module,
+            temp,
+            lambda_param,
             train_dataloader: torch.utils.data.DataLoader, 
             test_dataloader: torch.utils.data.DataLoader, 
             optimizer: torch.optim.Optimizer,
@@ -486,41 +440,6 @@ def trainKD(teacher: torch.nn.Module,
             model_name: str,
             device: torch.device) -> Dict[str, List]:
 
-    r"""Trains and tests a PyTorch model with Knowdlege distillation.
-
-    Passes a target PyTorch models through trainKD_step() and test_step()
-    functions for a number of epochs, training and testing the model
-    in the same epoch loop.
-
-    Calculates, prints and stores evaluation metrics throughout.
-
-    Args:
-        teacher: A PyTorch model to be learned of.
-        student: A PyTorch model to train and test.
-        train_dataloader: A DataLoader instance for the model to be trained on.
-        test_dataloader: A DataLoader instance for the model to be tested on.
-        optimizer: A PyTorch optimizer to help minimize the loss function.
-        loss_fn: A PyTorch loss function to calculate loss on both datasets.
-        epochs: An integer indicating how many epochs to train for.
-        writer: A TensorBoard writer to log the training
-        model_name: The name of the model to later save it within the model folder
-        device: A target device to compute on (e.g. "cuda" or "cpu").
-
-    Returns:
-        A dictionary of training and testing loss as well as training and
-        testing accuracy metrics. Each metric has a value in a list for 
-        each epoch.
-        In the form: {train_loss: [...],
-                train_acc: [...],
-                test_loss: [...],
-                test_acc: [...]} 
-        For example if training for epochs=2: 
-                {train_loss: [2.0616, 1.0537],
-                train_acc: [0.3945, 0.3945],
-                test_loss: [1.2641, 1.5706],
-                test_acc: [0.3400, 0.2973]} 
-    """
-    
     # Create empty results dictionary
     results = {"train_loss": [],
                "train_acc": [],
@@ -530,7 +449,9 @@ def trainKD(teacher: torch.nn.Module,
     
     # Make sure model on target device
     teacher.to(device)
+    teacher.eval()
     student.to(device)
+    student.train()
     
     print("Generating comparative performance")
     _, current_max = test_step(model=student,
@@ -546,6 +467,8 @@ def trainKD(teacher: torch.nn.Module,
                                            student=student,
                                            dataloader=train_dataloader,
                                            loss_fn=loss_fn,
+                                           temp=temp,
+                                           lambda_param=lambda_param,
                                            optimizer=optimizer,
                                            device=device)
         
