@@ -366,8 +366,6 @@ def distillation_loss(teacher_pred, student_pred, student_target_loss, temp,lamb
     soft_teacher = F.softmax(teacher_pred / temp, dim=-1)
     soft_student = F.log_softmax(student_pred / temp, dim=-1)
     
-    print(soft_student.shape, soft_teacher.shape)
-    
     distillation_loss = loss_fn(soft_student, soft_teacher) * (temp ** 2)
     
     loss = (1. - lambda_param) * student_target_loss + lambda_param * distillation_loss
@@ -459,6 +457,8 @@ def trainKD(teacher: torch.nn.Module,
           loss_fn=loss_fn,
           device=device)
     print(f"First performance: {current_max}")
+    
+    loss_test = nn.CrossEntropyLoss()
 
     # Loop through training and testing steps for a number of epochs
     for epoch in tqdm(range(epochs)):
@@ -474,7 +474,7 @@ def trainKD(teacher: torch.nn.Module,
         
         test_loss, test_acc = test_step(model=student,
           dataloader=test_dataloader,
-          loss_fn=loss_fn,
+          loss_fn=loss_test,
           device=device)
         
         writer.add_scalar("Loss/train", train_loss, epoch)

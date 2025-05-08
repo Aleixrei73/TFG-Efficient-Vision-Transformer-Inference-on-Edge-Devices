@@ -159,6 +159,14 @@ def load_default_model():
     vit.load_state_dict(torch.load(model_path, weights_only=True))
     return vit
 
+def load_distilled_model(size, type):
+    model_path = Path(f"model/ViT-Distilated{type}{size}-Best.pht")
+    vit = torch.hub.load('facebookresearch/deit:main', f'deit_{size}_patch16_224', pretrained=False)
+    if size == 'small' : vit.head = nn.Linear(in_features=384, out_features=10)
+    else : vit.head = nn.Linear(in_features=192, out_features=10)
+    vit.load_state_dict(torch.load(model_path, weights_only=True))
+    return vit
+
 def sumarize(model):
     print(summary(model=model,
         input_size=(32, 3, 224, 224), # (batch_size, color_channels, height, width)
