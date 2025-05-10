@@ -49,4 +49,4 @@ train_dl, test_dl, val_dl, class_names = utils.create_loaders("data", transform=
 optimizer = torch.optim.AdamW(student.parameters(), lr=0.0005/64, weight_decay=0.01)
 writer = SummaryWriter()
 
-trainer_aux.trainKD(teacher,student,3,0.5,train_dl,test_dl,optimizer,loss_fn,epochs=100, writer=writer, model_name="DistilatedSoftTry1-Continue", device=device)
+trainer_aux.trainKD(teacher,student,3,0.7,train_dl,test_dl,optimizer,loss_fn,epochs=100, writer=writer, model_name="DistilatedSoftTry1-Continue", device=device)
