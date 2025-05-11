@@ -160,7 +160,7 @@ def load_default_model():
     return vit
 
 def load_distilled_model(size, type):
-    model_path = Path(f"model/ViT-Distilated{type}{size}-Best.pht")
+    model_path = Path(f"model/Distillation/ViT-Distilated{type}{size}-Best.pht")
     vit = torch.hub.load('facebookresearch/deit:main', f'deit_{size}_patch16_224', pretrained=False)
     if size == 'small' : vit.head = nn.Linear(in_features=384, out_features=10)
     else : vit.head = nn.Linear(in_features=192, out_features=10)
