@@ -1,0 +1,5 @@
+Mean total time over 2000 executions: 5.869483590126038 +- 0.5755110135287957 ms/batch 
+Mean memory time over 2000 executions: 0.23324930667877197 +- 0.06049853900721908 ms/batch 
+Mean inference time over 2000 executions: 5.636234283447266 +- 0.5627783386801315 ms/batch 
+Mean memory over 2000 executions: 286.107421875 +- 0.5755110135287957 MB
+Accuracy: 88.83%

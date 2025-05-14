@@ -19,9 +19,9 @@ torch.cuda.manual_seed(0)
 
 pretrained_vit_weights = torchvision.models.ViT_B_16_Weights.DEFAULT
 vit_default = utils.load_default_model()
-prunning = 0.5997
+prunning = 0.7999
 pruned_model = utils.prune_vit(vit_default, prunning)
-pruned_model.load_state_dict(torch.load(f"model/Pruning//ViT-PrunningDef{prunning:.2f}-Best.pht", weights_only=True))
+pruned_model.load_state_dict(torch.load(f"model/Pruning/ViT-PrunningDef{prunning:.1f}-Best.pht", weights_only=True))
 pretrained_vit_transforms = pretrained_vit_weights.transforms()
 tome.patch.swag(pruned_model)
 
@@ -49,7 +49,7 @@ for i in tqdm(range(1, 7)):
     target_dir_path.mkdir(parents=True,exist_ok=True)
 
             # Create model save path
-    model_save_path = target_dir_path / f"ViT-Combine-Pruning-Merging{merging_step*i}-Best.pht"
+    model_save_path = target_dir_path / f"ViT-Combine-Pruning{prunning:.2f}-Merging{merging_step*i}-Best.pht"
 
             # Save the model state_dict()
     print(f"[INFO] Saving model to: {model_save_path}")
@@ -59,6 +59,6 @@ for i in tqdm(range(1, 7)):
 
     pretrained_vit_results, max_perf = trainer.train(model=merging_model, train_dataloader=train_dl,
                                         test_dataloader=test_dl, optimizer=optimizer, scheduler=scheduler,
-                                        loss_fn=loss_fn, epochs=5, writer=writer, model_name=f"Combine-Pruning-Merging{merging_step*i}" , device=device)
+                                        loss_fn=loss_fn, epochs=3, writer=writer, model_name=f"Combine-Pruning{prunning:.2f}-Merging{merging_step*i}" , device=device)
     print(f"Max performance: {max_perf}")
     writer.close()
