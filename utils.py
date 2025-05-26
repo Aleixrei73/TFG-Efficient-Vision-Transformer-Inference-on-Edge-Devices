@@ -223,20 +223,21 @@ def prune_vit(model,amount):
         
     return model_pruned
 
-def get_pareto(df, x, y, bigger=False):
-    df_aux = df.sort_values(x, ascending=True)
+def get_pareto(df, y, bigger=False):
+    df_aux = df
+    df_aux = df_aux.sort_values("Accuracy", ascending=True)
     pareto_inference = [[],[]]
     max_val = df_aux[y].iloc[0]
     if not bigger:
         for idx, row in df_aux.iterrows():
             if row[y] <= max_val:
-                pareto_inference[0].append(row[x])
+                pareto_inference[0].append(row["Accuracy"])
                 pareto_inference[1].append(row[y])
                 max_val = row[y]
     else:
         for idx, row in df_aux.iterrows():
             if row[y] >= max_val:
-                pareto_inference[0].append(row[x])
+                pareto_inference[0].append(row["Accuracy"])
                 pareto_inference[1].append(row[y])
                 max_val = row[y]
     
