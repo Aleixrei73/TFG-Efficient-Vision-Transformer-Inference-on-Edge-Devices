@@ -16,6 +16,8 @@ from torchinfo import summary
 from functools import reduce
 import copy
 import torch.nn.utils.prune as prune
+import seaborn as sns
+import numpy as np
 
 NUM_WORKERS = os.cpu_count()
 
@@ -242,3 +244,111 @@ def get_pareto(df, y, bigger=False):
                 max_val = row[y]
     
     return pareto_inference
+
+
+def plot_individual_metric(data, x, y, ax, ylabel, xlabel, label, color):
+    sns.lineplot(data, x=x, y=y,errorbar=None, label=label, ax=ax, color=color)
+    sns.scatterplot(data, x=x, y=y, ax=ax, color=color)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.legend()
+
+
+def plot_metrics_line(data, variable_name, title, save=False, save_name=None, sub_folder=None):
+    
+    fig, axes = plt.subplots(2,2, figsize=(18, 9))
+    
+    plot_individual_metric(data, "Pruning", "Inference Latency", axes[0][0], "Latency (ms)", variable_name, "Inference Latency", "blue")
+    plot_individual_metric(data, "Pruning", "Total Latency", axes[0][0], "Latency (ms)", variable_name, "Total Latency", "orange")
+    plot_individual_metric(data, "Pruning", "Mem Latency", axes[0][1], "Memory Latency", variable_name, "Memory Latency", "green")
+    plot_individual_metric(data, "Pruning", "Max Mem use", axes[1][0], "Memory Usage (MB)", variable_name, "Memory Usage", "red")
+    plot_individual_metric(data, "Pruning", "Accuracy", axes[1][1], "Accuracy (%)", variable_name, "Accuracy", "purple")
+
+    fig.suptitle(title)
+    plt.tight_layout()
+    
+    if save:
+        assert(save_name != None, "Lil bro, i el nombre?")
+        assert(sub_folder != None, "Lil bro, i el nombre del fichero?")
+        plt.savefig(f"summary/globalGraphs/{sub_folder}/{save_name}-Metrics.png")
+        
+    plt.show()
+    
+    
+def plot_elasticities_line(data, variable_name, title, save=False, save_name=None, sub_folder=None):
+    
+    
+    
+    
+    fig, axes = plt.subplots(1,2, figsize=(14, 5))
+    
+    plot_individual_metric(data, "Pruning", "Values time", axes[0], "Time elasticity", variable_name, "Time elasticity", "blue")
+    plot_individual_metric(data, "Pruning", "Values mem", axes[1], "Memory elasticity", variable_name, "Memory elasticity", "orange")
+
+
+    fig.suptitle(title)
+    
+    if save:
+        assert(save_name == None, "Lil bro, i el nombre?")
+        assert(sub_folder == None, "Lil bro, i el nombre del fichero?")
+        plt.savefig(f"summary/globalGraphs/{sub_folder}/{save_name}-Elasticity.png")
+        
+    plt.show()
+    
+    
+def plot_metric_heat(data, index, columns, values, subtitle, ax):
+    heat = data.pivot(index=index, columns=columns, values=values)
+    sns.heatmap(heat, cmap='viridis', annot=True, ax=ax)
+    ax.set_title(subtitle)
+
+def plot_metrics_heat(data, title, save=False, save_name=None, sub_folder=None):
+    
+    fig, axes = plt.subplots(2,2, figsize=(18, 9))
+    
+    plot_metric_heat(data, "Pruning", "Merging", "Inference Latency", "Inference latency heatmap", axes[0][0])
+    plot_metric_heat(data, "Pruning", "Merging", "Total Latency", "Total latency heatmap", axes[0][1])
+    plot_metric_heat(data, "Pruning", "Merging", "Mem Latency", "Memory latency heatmap", axes[1][0])
+    aux_data = copy.deepcopy(data)
+    aux_data["Max Mem use"] = np.log(aux_data["Max Mem use"])
+    plot_metric_heat(aux_data, "Pruning", "Merging", "Max Mem use", "Maximum memory use heatmap", axes[1][1])
+
+    fig.suptitle(title)
+    plt.tight_layout()
+    
+    if save:
+        assert(save_name == None, "Lil bro, i el nombre?")
+        assert(sub_folder == None, "Lil bro, i el nombre del fichero?")
+        plt.savefig(f"summary/globalGraphs/{sub_folder}/{save_name}-Metrics.png")
+        
+    plt.show()
+    
+    
+    fig, axes = plt.subplots(1,1)
+    
+    plot_metric_heat(data, "Pruning", "Merging", "Accuracy", "Accuracy heatmap", axes)
+    
+    plt.tight_layout()
+    
+    if save:
+        assert(save_name == None, "Lil bro, i el nombre?")
+        assert(sub_folder == None, "Lil bro, i el nombre del fichero?")
+        plt.savefig(f"summary/globalGraphs/{sub_folder}/{save_name}-Accuracy.png")
+        
+    plt.show()
+    
+def plot_elasticities_heat(data, title, save=False, save_name=None, sub_folder=None):
+    
+    fig, axes = plt.subplots(1,2, figsize=(14, 5))
+    
+    plot_metric_heat(data, "Pruning", "Merging", "Values time", "Time elasticity heatmap", axes[0])
+    plot_metric_heat(data, "Pruning", "Merging", "Values mem", "Memory elasticity heatmap", axes[1])
+
+    fig.suptitle(title)
+    plt.tight_layout()
+    
+    if save:
+        assert(save_name == None, "Lil bro, i el nombre?")
+        assert(sub_folder == None, "Lil bro, i el nombre del fichero?")
+        plt.savefig(f"summary/globalGraphs/{sub_folder}/{save_name}-Elasticity.png")
+        
+    plt.show()
