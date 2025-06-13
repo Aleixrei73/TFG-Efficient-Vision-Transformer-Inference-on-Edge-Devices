@@ -6,6 +6,8 @@ import utils
 
 offset = 0
 
+sns.set(font_scale=1.2)
+sns.set_style("whitegrid")
 df = pd.read_csv('summary/summarized_data.csv', index_col=['ViT Name'])
 original_acc = df.filter(regex="ViT-Defa*", axis=0)["Accuracy"].item()/100
 original_time = df.filter(regex="ViT-Defa*", axis=0)["Total Latency"].item()
